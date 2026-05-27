@@ -16,15 +16,33 @@ def main():
     p.init()
     screen = p.display.set_mode((WIDTH,HEIGHT))
     clock = p.time.Clock()
-    running = True
     screen.fill("white")
     gs = CE.GameState()
     print(gs.board)
     load_images()
+
+    sq_selected = ()
+    player_clicks = []
+    running = True
     while running:
         for event in p.event.get():
             if event.type == p.QUIT:
                 running = False
+            elif event.type == p.MOUSEBUTTONDOWN:
+                location = p.mouse.get_pos()
+                col = location[0]//SQ_SIZE
+                row = location[1]//SQ_SIZE
+                if sq_selected == (row,col):
+                    sq_selected = ()
+                    player_clicks = []
+                else:
+                    sq_selected = (row, col)
+                    player_clicks.append(sq_selected)
+                if len(player_clicks) == 2:
+                    move = CE.Move(player_clicks[0],player_clicks[1],gs.board)
+                    gs.make_move(move)
+                    player_clicks = []
+
         drawGameState(screen,gs)
         p.display.flip()
         clock.tick(30)
