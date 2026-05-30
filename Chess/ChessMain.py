@@ -17,8 +17,10 @@ def main():
     screen = p.display.set_mode((WIDTH,HEIGHT))
     clock = p.time.Clock()
     screen.fill("white")
+
     gs = CE.GameState()
-    print(gs.board)
+    valid_moves = gs.get_all_moves()
+    move_made = False
     load_images()
 
     sq_selected = ()
@@ -28,6 +30,7 @@ def main():
         for event in p.event.get():
             if event.type == p.QUIT:
                 running = False
+            #MOUSE HANDLERS
             elif event.type == p.MOUSEBUTTONDOWN:
                 location = p.mouse.get_pos()
                 col = location[0]//SQ_SIZE
@@ -40,8 +43,24 @@ def main():
                     player_clicks.append(sq_selected)
                 if len(player_clicks) == 2:
                     move = CE.Move(player_clicks[0],player_clicks[1],gs.board)
-                    gs.make_move(move)
+                    if move in valid_moves:
+                        gs.make_move(move)
+                        move_made = True
                     player_clicks = []
+                    sq_selected = ()
+            #KEY HANDLERS
+            elif event.type == p.KEYDOWN:
+                    if event.key == p.K_z:
+                        try:
+                            gs.undo_move()
+                            move_made = True
+                        except IndexError as e:
+                            print(e)
+                        sq_selected = ()
+                        player_clicks = []
+        if move_made:
+            valid_moves = gs.get_all_moves()
+            move_made = False
 
         drawGameState(screen,gs)
         p.display.flip()
